@@ -4,25 +4,6 @@ use std::{
     io::{BufRead, BufReader, Error, Lines},
 };
 
-#[derive(Debug)]
-pub enum GlobalError {
-    IoError(Error),
-}
-
-impl Display for GlobalError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            GlobalError::IoError(err) => write!(f, "{}", err),
-        }
-    }
-}
-
-impl From<Error> for GlobalError {
-    fn from(err: Error) -> Self {
-        GlobalError::IoError(err)
-    }
-}
-
 fn readfile(path: &str) -> Result<Lines<BufReader<File>>, GlobalError> {
     let file = File::open(path)?;
     let reader = BufReader::new(file);
