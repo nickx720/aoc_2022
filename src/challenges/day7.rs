@@ -5,8 +5,8 @@ pub fn run() -> Result<(), GlobalError> {
 }
 
 #[test]
+
 fn challenge_day_7_test_one() -> Result<(), GlobalError> {
-    
     assert_eq!(5, 5);
     Ok(())
 }
