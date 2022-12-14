@@ -9,7 +9,7 @@ pub fn run() -> Result<(), GlobalError> {
     Ok(())
 }
 
-pub fn challenge_one() -> Result<(), GlobalError> {
+pub fn challenge_one(input: InputType) -> Result<(), GlobalError> {
     Ok(())
 }
 
@@ -26,6 +26,8 @@ fn readfile(path: &str) -> Result<InputType, GlobalError> {
 
 #[test]
 fn challenge_day_7_test_one() -> Result<(), GlobalError> {
+    let readfile = readfile("assets/day7/sample.txt")?;
+    let output = challenge_one(readfile)?;
     assert_eq!(5, 5);
     Ok(())
 }
