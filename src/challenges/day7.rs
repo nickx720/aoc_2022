@@ -26,7 +26,7 @@ fn readfile(path: &str) -> Result<InputType, GlobalError> {
 
 #[test]
 fn challenge_day_7_test_one() -> Result<(), GlobalError> {
-    assert_eq!(5, 5);
+    assert_eq!(4, 4);
     Ok(())
 }
 #[test]
