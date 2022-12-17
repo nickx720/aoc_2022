@@ -33,6 +33,8 @@ fn challenge_day_7_test_one() -> Result<(), GlobalError> {
 }
 #[test]
 fn challenge_day_7_test_two() -> Result<(), GlobalError> {
+    let readfile = readfile("assets/day7/sample.txt")?;
+    let output = challenge_one(readfile)?;
     assert_eq!(23, 23);
     Ok(())
 }
