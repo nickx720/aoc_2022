@@ -132,10 +132,43 @@ fn solution_one(input: &str) -> Result<usize, GlobalError> {
     Ok(inspections.iter().rev().take(2).product())
 }
 
+fn solution_two(input: &str) -> Result<usize, GlobalError> {
+    let mut monkeys = parse(input).unwrap();
+    let mut inspections = vec![0; monkeys.len()];
+    let common_multiple: u64 = monkeys.iter().map(|monkey| monkey.test.divisible).product();
+
+    for _ in 0..10_000 {
+        for idx in 0..monkeys.len() {
+            let items: Vec<u64> = monkeys[idx].items.drain(..).collect();
+            let monkey = monkeys[idx].clone();
+            for old in items {
+                inspections[idx] += 1;
+
+                let new = monkey.operation.apply(old);
+
+                let new = new % common_multiple;
+
+                let idx = if new % monkey.test.divisible == 0 {
+                    monkey.test.true_recipient
+                } else {
+                    monkey.test.false_recipient
+                };
+
+                let receiver = &mut monkeys[idx];
+                receiver.items.push(new);
+            }
+        }
+    }
+    inspections.sort_unstable();
+    Ok(inspections.iter().rev().take(2).product())
+}
+
 pub fn run() -> Result<(), GlobalError> {
     let input = "assets/day11/input.txt";
-    let first_output = solution_one(input)?;
-    println!("The output is {first_output}");
+    //    let first_output = solution_one(input)?;
+    //    println!("The output is {first_output}");
+    let second_output = solution_two(input)?;
+    println!("The output is {second_output}");
     Ok(())
 }
 
@@ -148,6 +181,8 @@ fn challenge_one_day11() -> Result<(), GlobalError> {
 }
 #[test]
 fn challenge_two_day11() -> Result<(), GlobalError> {
-    assert_eq!(2713310158, 2713310158);
+    let input = "assets/day11/sample.txt";
+    let output = solution_two(input)?;
+    assert_eq!(2713310158usize, output);
     Ok(())
 }
