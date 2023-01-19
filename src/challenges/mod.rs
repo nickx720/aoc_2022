@@ -20,9 +20,10 @@ use std::{
 //mod day14;
 //mod day15;
 //mod day16;
-mod day17;
+//mod day17;
+mod day18;
 pub fn run() {
-    day17::run().unwrap();
+    day18::run().unwrap();
 }
 
 pub type InputType = Lines<BufReader<File>>;
