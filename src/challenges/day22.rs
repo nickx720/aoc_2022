@@ -1,5 +1,14 @@
 use super::GlobalError;
 
+enum Instruction {
+    Rotate(Turn),
+    Forward(u8),
+}
+
+enum Turn {
+    L,
+    R,
+}
 pub fn run() -> Result<(), GlobalError> {
     Ok(())
 }
