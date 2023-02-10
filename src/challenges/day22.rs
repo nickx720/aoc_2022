@@ -66,7 +66,21 @@ impl Direction {
 }
 
 fn wrap(map: &[Vec<Tile>], pos: &Coord, dir: &Direction) -> Coord {
-    todo!()
+    let Coord { row: dr, col: dc } = dir.offset();
+    let mut curr = pos.clone();
+    while let Some(tile) = map
+        .get((curr.row - dr) as usize)
+        .and_then(|row| row.get((curr.col - dc) as usize))
+    {
+        if *tile == Tile::None {
+            break;
+        }
+        curr = Coord {
+            row: curr.row - dr,
+            col: cur.col - dc,
+        };
+    }
+    curr
 }
 
 fn parse(input: &str) -> (Vec<Vec<Tile>>, Vec<Instruction>) {
