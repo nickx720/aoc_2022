@@ -10,6 +10,7 @@ enum Turn {
     R,
 }
 
+#[derive(PartialEq)]
 enum Tile {
     Open,
     Solid,
@@ -77,7 +78,7 @@ fn wrap(map: &[Vec<Tile>], pos: &Coord, dir: &Direction) -> Coord {
         }
         curr = Coord {
             row: curr.row - dr,
-            col: cur.col - dc,
+            col: curr.col - dc,
         };
     }
     curr
@@ -124,13 +125,64 @@ fn parse(input: &str) -> (Vec<Vec<Tile>>, Vec<Instruction>) {
     (map, instructions)
 }
 
+fn solution_one(path: &str) -> i32 {
+    let input = std::fs::read_to_string(path).unwrap();
+    let (map, instructions) = parse(&input);
+    let start_col = map[0].iter().position(|tile| *tile == Tile::Open).unwrap() as i32;
+
+    let mut pos = Coord {
+        row: 0,
+        col: start_col,
+    };
+
+    let mut dir = Direction::R;
+
+    for inst in &instructions {
+        match inst {
+            Instruction::Rotate(turn) => dir = dir.turn(turn),
+            Instruction::Forward(amount) => {
+                for _ in 0..*amount {
+                    let Coord { row: dr, col: dc } = dir.offset();
+                    let new_tile = map
+                        .get((pos.row + dr) as usize)
+                        .and_then(|row| row.get((pos.col + dc) as usize))
+                        .unwrap_or(&Tile::None);
+
+                    match new_tile {
+                        Tile::Solid => break,
+                        Tile::Open => {
+                            pos = Coord {
+                                row: pos.row + dr,
+                                col: pos.col + dc,
+                            };
+                        }
+                        Tile::None => {
+                            let new_pos = wrap(&map, &pos, &dir);
+                            if map[new_pos.row as usize][new_pos.col as usize] == Tile::Solid {
+                                break;
+                            }
+                            pos = new_pos;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    1000 * (pos.row + 1) + 4 * (pos.col + 1) + dir.score() as i32
+}
+
 pub fn run() -> Result<(), GlobalError> {
+    let path = "assets/day22/input.txt";
+    let output = solution_one(path);
+    println!("The first output is {output}");
     Ok(())
 }
 
 #[test]
 fn challenge_one_day_22() -> Result<(), GlobalError> {
-    assert_eq!(2, 2);
+    let path = "assets/day22/sample.txt";
+    let output = solution_one(path);
+    assert_eq!(output, 6032);
     Ok(())
 }
 #[test]
