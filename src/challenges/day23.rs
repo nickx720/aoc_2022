@@ -157,6 +157,11 @@ fn solution_one(path: &str) -> usize {
                 elves.insert(new_coord);
             }
         }
+
+        //  println!("-- End of Round {round}");
+        //  print(&elves);
+        //  println!();
+
         checks.rotate_left(1);
         if round == 10 {
             let (minmax_row, minmax_col) = elves.iter().fold(
