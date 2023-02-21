@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use super::GlobalError;
 
@@ -106,6 +106,79 @@ fn parse(input: &str) -> (HashMap<Coord, Tile>, usize, usize) {
         }
     }
     (map, rows, cols)
+}
+
+fn lcm(first: usize, second: usize) -> usize {
+    first * second / gcd(first, second)
+}
+
+fn gcd(first: usize, second: usize) -> usize {
+    let mut max = first;
+    let mut min = second;
+    if min > max {
+        std::mem::swap(&mut max, &mut min);
+    }
+
+    loop {
+        let res = max % min;
+        if res == 0 {
+            return min;
+        }
+        max = min;
+        min = res;
+    }
+}
+
+fn blitz_maps(
+    map: &HashMap<Coord, Tile>,
+    rows: usize,
+    cols: usize,
+    max_time: usize,
+) -> HashMap<usize, HashSet<Coord>> {
+    let mut cache = HashMap::new();
+
+    let mut blizzards: Vec<(Coord, Direction)> = map
+        .iter()
+        .filter_map(|(pos, tile)| match tile {
+            Tile::Wall => None,
+            Tile::Blizzard(dir) => Some((*pos, *dir)),
+        })
+        .collect();
+
+    let coords = blizzards.iter().map(|(coord, _)| *coord).collect();
+    cache.insert(0, coords);
+
+    for time in 1..max_time {
+        for (coord, dir) in blizzards.iter_mut() {
+            *coord = coord.add_dir(dir);
+            match dir {
+                Direction::Left => {
+                    if coord.col == 0 {
+                        coord.col = cols - 2;
+                    }
+                }
+
+                Direction::Right => {
+                    if coord.col == cols - 1 {
+                        coord.col = 1;
+                    }
+                }
+                Direction::Up => {
+                    if coord.row == 0 {
+                        coord.row = rows - 2;
+                    }
+                }
+                Direction::Down => {
+                    if coord.row == rows - 1 {
+                        coord.row = 1;
+                    }
+                }
+            }
+        }
+        let coords = blizzards.iter().map(|(coord, _)| *coord).collect();
+        cache.insert(time, coords);
+    }
+    cache
 }
 
 pub fn run() -> Result<(), GlobalError> {
