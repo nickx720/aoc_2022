@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{BinaryHeap, HashMap, HashSet};
 
 use super::GlobalError;
 
@@ -181,13 +181,71 @@ fn blitz_maps(
     cache
 }
 
+fn part_one(path: &str) -> usize {
+    let input = std::fs::read_to_string(path).unwrap();
+
+    let (map, rows, cols) = parse(&input);
+    let walls: HashSet<Coord> = map
+        .iter()
+        .filter(|(_, tile)| **tile == Tile::Wall)
+        .map(|(pos, _)| *pos)
+        .collect();
+    let lcm = lcm(rows - 2, cols - 2);
+    let blizzard_maps = blitz_maps(&map, rows, cols, lcm);
+    let start = Coord { row: 0, col: 1 };
+    let end = Coord {
+        row: rows - 1,
+        col: cols - 2,
+    };
+
+    let mut pq = BinaryHeap::new();
+    let mut seen = HashSet::new();
+
+    pq.push(Node {
+        cost: 0,
+        pos: start,
+    });
+    seen.insert((start, 0));
+
+    while let Some(Node { cost, pos }) = pq.pop() {
+        if pos == end {
+            return cost;
+        }
+
+        let new_cost = cost + 1;
+        let blizzards = &blizzard_maps[&(new_cost % lcm)];
+
+        let candidates = pos
+            .neighbours(rows, cols)
+            .into_iter()
+            .chain(std::iter::once(pos))
+            .filter(|coord| !walls.contains(coord))
+            .filter(|coord| !blizzards.contains(coord));
+
+        for new_pos in candidates {
+            if seen.insert((new_pos, new_cost)) {
+                pq.push(Node {
+                    cost: new_cost,
+                    pos: new_pos,
+                });
+            }
+        }
+    }
+    usize::MAX
+}
+
 pub fn run() -> Result<(), GlobalError> {
+    let path = "assets/day24/input.txt";
+    let output = part_one(path);
+    println!("{output} is the first result");
     Ok(())
 }
 
 #[test]
 fn challenge_one_day_24() -> Result<(), GlobalError> {
-    assert_eq!(2, 2);
+    let path = "assets/day24/sample.txt";
+    let output = part_one(path);
+    assert_eq!(output, 18);
     Ok(())
 }
 
