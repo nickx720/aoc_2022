@@ -234,9 +234,94 @@ fn part_one(path: &str) -> usize {
     usize::MAX
 }
 
+struct MapInfo {
+    rows: usize,
+    cols: usize,
+    walls: HashSet<Coord>,
+    blizzard_maps: HashMap<usize, HashSet<Coord>>,
+    repeats_at: usize,
+}
+
+fn shortest(from: Coord, to: Coord, start_time: usize, map_info: &MapInfo) -> usize {
+    let MapInfo {
+        rows,
+        cols,
+        walls,
+        blizzard_maps,
+        repeats_at,
+    } = map_info;
+    let mut pq = BinaryHeap::new();
+
+    let mut seen = HashSet::new();
+
+    pq.push(Node {
+        cost: start_time,
+        pos: from,
+    });
+    seen.insert((from, start_time));
+
+    while let Some(Node { cost, pos }) = pq.pop() {
+        if pos == to {
+            return cost;
+        }
+
+        let new_cost = cost + 1;
+        let blizzards = &blizzard_maps[&(new_cost % repeats_at)];
+
+        let candidates = pos
+            .neighbours(*rows, *cols)
+            .into_iter()
+            .chain(std::iter::once(pos))
+            .filter(|coord| !walls.contains(coord))
+            .filter(|coord| !blizzards.contains(coord));
+
+        for new_pos in candidates {
+            if seen.insert((new_pos, new_cost)) {
+                pq.push(Node {
+                    cost: new_cost,
+                    pos: new_pos,
+                })
+            }
+        }
+    }
+    usize::MAX
+}
+
+fn part_two(path: &str) -> usize {
+    let input = std::fs::read_to_string(path).unwrap();
+
+    let (map, rows, cols) = parse(&input);
+    let walls: HashSet<Coord> = map
+        .iter()
+        .filter(|(_, tile)| **tile == Tile::Wall)
+        .map(|(pos, _)| *pos)
+        .collect();
+
+    let lcm = lcm(rows - 2, cols - 2);
+    let blizzard_maps = blitz_maps(&map, rows, cols, lcm);
+    let start = Coord { row: 0, col: 1 };
+    let end = Coord {
+        row: rows - 1,
+        col: cols - 2,
+    };
+
+    let map_info = MapInfo {
+        rows,
+        cols,
+        repeats_at: lcm,
+        walls,
+        blizzard_maps,
+    };
+    let there = shortest(start, end, 0, &map_info);
+    let back = shortest(end, start, there, &map_info);
+    shortest(start, end, back, &map_info)
+}
+
 pub fn run() -> Result<(), GlobalError> {
     let path = "assets/day24/input.txt";
-    let output = part_one(path);
+    //    let output = part_one(path);
+    //    println!("{output} is the first result");
+    let output = part_two(path);
     println!("{output} is the first result");
     Ok(())
 }
@@ -251,6 +336,8 @@ fn challenge_one_day_24() -> Result<(), GlobalError> {
 
 #[test]
 fn challenge_two_day_24() -> Result<(), GlobalError> {
-    assert_eq!(2, 2);
+    let path = "assets/day24/sample.txt";
+    let output = part_two(path);
+    assert_eq!(output, 54);
     Ok(())
 }
