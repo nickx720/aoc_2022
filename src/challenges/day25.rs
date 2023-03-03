@@ -24,13 +24,24 @@ fn to_decimal(snafu: &str) -> i64 {
     })
 }
 
+fn solution_one(path: &str) -> String {
+    let input = std::fs::read_to_string(path).unwrap();
+    let sum = input.lines().map(to_decimal).sum();
+    to_snafu(sum)
+}
+
 pub fn run() -> Result<(), GlobalError> {
+    let path = "assets/day25/input.txt";
+    let output = solution_one(path);
+    println!("The output for first part is {output}");
     Ok(())
 }
 
 #[test]
 fn testing_challenge_one() -> Result<(), GlobalError> {
-    assert_eq!(2, 2);
+    let path = "assets/day25/sample.txt";
+    let output = solution_one(path);
+    assert_eq!("2=-1=0", output);
     Ok(())
 }
 #[test]
